@@ -50,18 +50,10 @@ export default function MusicVotingApp() {
         body:JSON.stringify(newSongatcual)
       })
       const data=await res.json()
+      console.log("Newly added stream-" ,data)
       // console.log("newly added stream",await res.json())
 
-      const newSong = {
-        active:true,
-        id: queue.length + 1,//
-        title: `New Song ${queue.length + 1}`,
-        description: 'New Artist',
-        extractedId:'',
-        userId:'',
-        upvotes: 0,
-        url: newSongUrl
-      }
+      
       
       setQueue([...queue, data.stream])
       setNewSongUrl('')
