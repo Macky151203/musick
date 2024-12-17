@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast"
 import { useSession } from 'next-auth/react'
 
 const initialQueue: any[] | (() => any[]) = [
-  // { id: 1, title: 'Song 1', description: 'Artist 1', upvotes: 5, url: 'dQw4w9WgXcQ' },
+  //{ id: 1, title: 'Song 1', description: 'Artist 1', upvotes: 5, url: 'paWE-GvDO1c' },
   // { id: 2, title: 'Song 2', description: 'Artist 2', upvotes: 3, url: 'dQw4w9WgXcQ' },
   // { id: 3, title: 'Song 3', description: 'Artist 3', upvotes: 1, url: 'dQw4w9WgXcQ' },
 ]
@@ -182,7 +182,7 @@ export default function MusicVotingApp() {
 
         <div>
           <h2 className="text-2xl font-semibold mb-2 text-blue-300">Up Next</h2>
-          {queue&&queue.map((song) => (
+          {queue.length>0&&queue.map((song) => (
             <Card key={song.id} className="mb-2 bg-gradient-to-r from-gray-800 to-gray-900 border-gray-700 hover:border-blue-500 transition-colors">
               <CardContent className="flex flex-col md:flex-row items-center justify-between p-4">
                 <div className="flex-grow">
