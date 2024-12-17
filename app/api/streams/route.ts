@@ -19,7 +19,7 @@ export async function POST(req:NextRequest){
     const details=await youtubesearchapi.GetVideoDetails(extractedId)
     // console.log(details)
     //try adding dummy title
-    const title="title"
+    const title=details.title
     const description=details.description
     const stream=await prismaClient.stream.create({
       data:{
@@ -35,7 +35,7 @@ export async function POST(req:NextRequest){
 
   }catch(e){
     
-    return NextResponse.json({Msg:"Error in schea validation"})
+    return NextResponse.json({Msg:"Error in schea validation",error:e})
   }
 
 }
