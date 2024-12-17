@@ -18,7 +18,8 @@ export async function POST(req:NextRequest){
     const extractedId=data.url.split("?v=")[1]
     const details=await youtubesearchapi.GetVideoDetails(extractedId)
     // console.log(details)
-    const title=details.title
+    //try adding dummy title
+    const title="title"
     const description=details.description
     const stream=await prismaClient.stream.create({
       data:{
