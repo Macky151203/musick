@@ -1,6 +1,5 @@
 'use client'
-//prima client issue validation problem
-//make new sharing page, handle upvotes and when the song is done playing then delete it from db as well while popping from queue
+//make new sharing page and when the song is done playing then delete it from db as well while popping from queue
 import { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -65,10 +64,29 @@ export default function MusicVotingApp() {
     
   }
 
-  const handleVote = (id: number, increment: number) => {
-    setQueue(queue.map(song => 
-      song.id === id ? { ...song, votes: song.upvotes + increment } : song
-    ).sort((a, b) => b.upvotes - a.upvotes))
+  const handleVote = async(id: number, increment: number) => {
+    console.log("streamid-",id)
+    const response=await fetch(increment==1?'/api/streams/upvotes':'/api/streams/downvotes',{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({streamId:id})
+    })
+    const r=await response.json()
+    
+    if(r.status==1){
+      setQueue(queue.map(song => 
+        song.id === id ? { ...song, upvotes: song.upvotes + increment } : song
+      ).sort((a, b) => b.upvotes - a.upvotes))
+    }
+    else{
+      toast({
+        title: "Alert",
+        description: "Cannot upvote or downvote more than once!!",
+        variant: "destructive",
+      })
+    }
   }
 
   const handleShare = async() => {
@@ -180,7 +198,7 @@ export default function MusicVotingApp() {
               <CardContent className="flex flex-col md:flex-row items-center justify-between p-4">
                 <div className="flex-grow">
                   <h3 className="font-semibold text-purple-300">{song.title}</h3>
-                  <p className="text-sm text-gray-400 overflow-hidden text-ellipsis">{truncateDescription(song.description)}</p>
+                  <p className="text-sm text-gray-400 overflow-hidden text-ellipsis"><span className='font-semibold'>Description-</span>{truncateDescription(song.description)}</p>
                 </div>
                 <div className="flex items-center gap-2 mt-2 md:mt-0">
                   <span className="text-lg font-bold text-blue-400">{song.upvotes}</span>

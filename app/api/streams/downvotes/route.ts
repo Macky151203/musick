@@ -28,11 +28,12 @@ export async function POST(req:NextRequest){
         }
       }
     })
-    return NextResponse.json({msg:"Downvote added"})
+    return NextResponse.json({msg:"Downvote added",status:1})
 
     
   }catch(e){
     console.log("error during upvote")
+    return NextResponse.json({msg:"Error",status:-1})
   }
 
 }

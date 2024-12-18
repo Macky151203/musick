@@ -26,10 +26,11 @@ export async function POST(req:NextRequest){
         streamId: data.streamId
       }
     })
-    return NextResponse.json({msg:"Upvoted added"})
+    return NextResponse.json({msg:"Upvoted added",status:1})
     
   }catch(e){
     console.log("error during upvote")
+    return NextResponse.json({msg:"Only one upvoteb allowed",status:-1})
   }
 
 }
