@@ -17,7 +17,7 @@ const initialQueue: any[] | (() => any[]) = [
   // { id: 3, title: 'Song 3', description: 'Artist 3', upvotes: 1, url: 'dQw4w9WgXcQ' },
 ]
 
-export default function StreamView({params}:{params:{creatorId:string}}) {
+export default function StreamView({params}:{params:any}) {
   const [cid,setid]=useState("")
   const [queue, setQueue] = useState(initialQueue)
   const [newSongUrl, setNewSongUrl] = useState('')
