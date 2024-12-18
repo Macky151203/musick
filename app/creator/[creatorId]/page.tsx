@@ -17,7 +17,8 @@ const initialQueue: any[] | (() => any[]) = [
   // { id: 3, title: 'Song 3', description: 'Artist 3', upvotes: 1, url: 'dQw4w9WgXcQ' },
 ]
 
-export default function StreamView({params:{creatorId}}:{params:{creatorId:string}}) {
+export default function StreamView({params}:{params:{creatorId:string}}) {
+  const [cid,setid]=useState("")
   const [queue, setQueue] = useState(initialQueue)
   const [newSongUrl, setNewSongUrl] = useState('')
   const [currentSong, setCurrentSong] = useState(queue[0])
@@ -127,7 +128,7 @@ export default function StreamView({params:{creatorId}}:{params:{creatorId:strin
   }
 
   const getstreams=async()=>{
-    const allstreams=await fetch(`/api/streams?creatorId=${creatorId}`)
+    const allstreams=await fetch(`/api/streams?creatorId=${cid}`)
     const data=await allstreams.json()
     console.log(data)
     setQueue(data.streams)
@@ -135,12 +136,18 @@ export default function StreamView({params:{creatorId}}:{params:{creatorId:strin
   }
 
   useEffect(() => {
+    const getid=async()=>{
+      const paramid=await params 
+      setid(paramid.creatorId)
+      console.log("id",paramid.creatorId)
+    }
+    getid()
     getstreams()
     // if (queue.length > 0 && currentSong.id !== queue[0].id) {
     //   setCurrentSong(queue[0])
     // }
     console.log("inside effect")
-  }, [queue.length])
+  }, [queue.length,cid])
 
   const truncateDescription = (description: string) => {
     const words = description.split(' ');
