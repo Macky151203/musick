@@ -44,10 +44,22 @@ export async function POST(req:NextRequest){
 export async function GET(req:NextRequest) {
   const creatorId=req.nextUrl.searchParams.get('creatorId')
   //console.log(creatorId)
-  const streamdata=await prismaClient.stream.findMany({
+  const streams=await prismaClient.stream.findMany({
     where:{
       userId:creatorId??""
+    },
+    include:{
+      _count:{
+        select:{
+          upvotes:true
+        }
+      }
     }
   })
-  return NextResponse.json({streamdata})
+  return NextResponse.json({
+    streams:streams.map(({_count,...rest})=>({
+      ...rest,
+      upvotes:_count.upvotes
+    }))
+  })
 }
