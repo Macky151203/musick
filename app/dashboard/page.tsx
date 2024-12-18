@@ -65,7 +65,7 @@ export default function MusicVotingApp() {
   }
 
   const handleVote = async(id: number, increment: number) => {
-    console.log("streamid-",id)
+    //console.log("streamid-",id)
     const response=await fetch(increment==1?'/api/streams/upvotes':'/api/streams/downvotes',{
       method:"POST",
       headers:{
@@ -76,9 +76,11 @@ export default function MusicVotingApp() {
     const r=await response.json()
     
     if(r.status==1){
+      
       setQueue(queue.map(song => 
         song.id === id ? { ...song, upvotes: song.upvotes + increment } : song
       ).sort((a, b) => b.upvotes - a.upvotes))
+      //console.log("after sorting-",queue)
     }
     else{
       toast({
