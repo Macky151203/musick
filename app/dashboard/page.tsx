@@ -1,4 +1,5 @@
 'use client'
+//prima client issue validation problem
 //make new sharing page, handle upvotes and when the song is done playing then delete it from db as well while popping from queue
 import { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
