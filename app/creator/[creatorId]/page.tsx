@@ -1,6 +1,6 @@
 'use client'
-//fetch by creator id in this page
-//make new sharing page and when the song is done playing then delete it from db as well while popping from queue
+
+// when the song is done playing then delete it from db as well while popping from queue
 import { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -36,10 +36,7 @@ export default function StreamView({params}:{params:any}) {
     e.preventDefault()
     if(session.data?.user){
       setIsLoading(true)
-      const response=await fetch('/api/streams/getuser')
-      const temp=await response.json()
-      console.log("temp--",temp)
-      const creatorid=temp.creatorId
+      const creatorid=cid
       const newSongatcual = {
         creatorId:creatorid,
         url: newSongUrl
