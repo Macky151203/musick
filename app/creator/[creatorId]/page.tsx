@@ -128,8 +128,9 @@ export default function StreamView({params}:{params:any}) {
   const getstreams=async()=>{
     const allstreams=await fetch(`/api/streams?creatorId=${cid}`)
     const data=await allstreams.json()
-    console.log(data)
+    console.log(data.streams)
     setQueue(data.streams)
+    
     
   }
 

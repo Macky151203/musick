@@ -19,8 +19,8 @@ export async function POST(req:NextRequest){
     const details=await youtubesearchapi.GetVideoDetails(extractedId)
     // console.log(details)
     
-    const title=details.title??"title"
-    const description=details.description??"description"
+    const title=details.title??"Could not fetch title"
+    const description=details.description??"Could not fetch description"
     const stream=await prismaClient.stream.create({
       data:{
         userId:data.creatorId,

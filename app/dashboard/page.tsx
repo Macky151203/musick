@@ -126,8 +126,9 @@ export default function MusicVotingApp() {
   const getstreams = async () => {
     const allstreams = await fetch('/api/streams/my')
     const data = await allstreams.json()
-    console.log(data)
-    setQueue(data.streams)
+    console.log(data.streams)
+    let tempdata=data.streams.sort((a:any,b:any)=>b.upvotes-a.upvotes)
+    setQueue(tempdata)
 
   }
 
