@@ -9,7 +9,8 @@ import { ThumbsUp, ThumbsDown, SkipForward, Share2 } from 'lucide-react'
 
 
 import { useToast } from "@/hooks/use-toast"
-import { useSession } from 'next-auth/react'
+import { signIn, useSession } from 'next-auth/react'
+import Appbar from '@/app/comps/appbar'
 
 const initialQueue: any[] | (() => any[]) = [
   //{ id: 1, title: 'Song 1', description: 'Artist 1', upvotes: 5, url: 'paWE-GvDO1c' },
@@ -106,23 +107,23 @@ export default function StreamView({params}:{params:any}) {
     })
   }
 
-  const playNextSong = () => {
-    if (queue.length > 1) {
-      const newQueue = [...queue.slice(1)]
-      setQueue(newQueue)
-      setCurrentSong(newQueue[0])
-      toast({
-        title: "Playing next song",
-        description: `Now playing: ${newQueue[0].title}`,
-      })
-    } else {
-      toast({
-        title: "No more songs in queue",
-        description: "Add more songs to the queue!",
-        variant: "destructive",
-      })
-    }
-  }
+  // const playNextSong = () => {
+  //   if (queue.length > 1) {
+  //     const newQueue = [...queue.slice(1)]
+  //     setQueue(newQueue)
+  //     setCurrentSong(newQueue[0])
+  //     toast({
+  //       title: "Playing next song",
+  //       description: `Now playing: ${newQueue[0].title}`,
+  //     })
+  //   } else {
+  //     toast({
+  //       title: "No more songs in queue",
+  //       description: "Add more songs to the queue!",
+  //       variant: "destructive",
+  //     })
+  //   }
+  // }
 
   const getstreams=async()=>{
     const allstreams=await fetch(`/api/streams?creatorId=${cid}`)
@@ -133,6 +134,12 @@ export default function StreamView({params}:{params:any}) {
   }
 
   useEffect(() => {
+
+    // if(!session.data?.user){
+    //   signIn()
+    // }
+    
+
     const getid=async()=>{
       const paramid=await params 
       setid(paramid.creatorId)
@@ -144,7 +151,7 @@ export default function StreamView({params}:{params:any}) {
     //   setCurrentSong(queue[0])
     // }
     console.log("inside effect")
-  }, [queue.length,cid])
+  }, [queue.length,cid,session])
 
   const truncateDescription = (description: string) => {
     const words = description.split(' ');
@@ -152,7 +159,8 @@ export default function StreamView({params}:{params:any}) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 text-gray-100 p-4">
+    <div className="min-h-screen bg-gray-900 text-gray-100 p-4">
+      <Appbar />
       <div className="max-w-4xl mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-between items-center mb-6">
           <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">Music Voting App</h1>
@@ -162,7 +170,7 @@ export default function StreamView({params}:{params:any}) {
           </Button>
         </div>
         
-        <div className="mb-6">
+        {/* <div className="mb-6">
           <div className="flex flex-col md:flex-row justify-between items-center mb-2">
             <h2 className="text-2xl font-semibold text-blue-300">Now Playing</h2>
             <Button onClick={playNextSong} className="bg-blue-600 hover:bg-blue-700 mt-4 md:mt-0">
@@ -180,7 +188,7 @@ export default function StreamView({params}:{params:any}) {
               allowFullScreen
             ></iframe>
           </div>
-        </div>
+        </div> */}
 
         <form onSubmit={handleSubmit} className="mb-6">
           <h2 className="text-2xl font-semibold mb-2 text-blue-300">Add a Song</h2>

@@ -9,9 +9,9 @@ export default function Appbar(){
   
   return (
     <>
-    <div className="flex justify-between p-8">
+    <div className="flex justify-between p-4 mb-4 shadow-md">
     <h1 className="text-2xl font-bold">StreamBeats</h1>      
-    <div>{!session.data?.user?<Button className="rounded-lg bg-blue-600 px-4 p-2" onClick={()=>signIn()}>SignIn</Button>:<Button className="rounded-lg bg-red-600 px-4 p-2" onClick={()=>signOut()}>SignOut</Button>}</div>
+    <div>{!session.data?.user?<Button className="rounded-lg bg-blue-600 px-4" onClick={()=>signIn()}>SignIn</Button>:<Button className="rounded-lg bg-red-600 px-4 " onClick={()=>signOut()}>SignOut</Button>}</div>
       
     </div>
     </>

@@ -17,12 +17,20 @@ const handler = NextAuth({
         return false
       }
       try{
-        await prismaClient.user.create({
-          data:{
-            email:params.user.email,
-            provider:"Google"
+        const user=await prismaClient.user.findFirst({
+          where:{
+            email:params.user.email??""
           }
         })
+        if(!user){
+          await prismaClient.user.create({
+            data:{
+              email:params.user.email,
+              provider:"Google"
+            }
+          })
+        }
+        
       }catch(e){
         console.log(e)
       }
