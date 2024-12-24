@@ -1,5 +1,4 @@
 'use client'
-// when the song is done playing then delete it from db as well while popping from queue
 import { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -48,7 +47,7 @@ export default function MusicVotingApp() {
         body: JSON.stringify(newSongatcual)
       })
       const data = await res.json()
-      console.log("Newly added stream-", data)
+      // console.log("Newly added stream-", data)
       // console.log("newly added stream",await res.json())
 
 
@@ -93,7 +92,7 @@ export default function MusicVotingApp() {
     //now make a new page for this route
     const response = await fetch('/api/streams/getuser')
     const temp = await response.json()
-    console.log("temp--", temp)
+    // console.log("temp--", temp)
     const creatorid = temp.creatorId
     navigator.clipboard.writeText(`http://${window.location.host}/creator/${creatorid}`).then(() => {
       toast({
@@ -105,9 +104,18 @@ export default function MusicVotingApp() {
     })
   }
 
-  const playNextSong = () => {
+  const playNextSong = async() => {
     if (queue.length > 1) {
       const newQueue = [...queue.slice(1)]
+      //delete
+      const res=await fetch('/api/streams/deletestream',{
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json'
+        },
+        body:JSON.stringify({streamId:queue[0].id,userId:queue[0].userId})
+      })
+      // console.log(await res.json())
       setQueue(newQueue)
       setCurrentSong(newQueue[0])
       toast({
@@ -115,18 +123,39 @@ export default function MusicVotingApp() {
         description: `Now playing: ${newQueue[0].title}`,
       })
     } else {
-      toast({
-        title: "No more songs in queue",
-        description: "Add more songs to the queue!",
-        variant: "destructive",
+      if(queue.length==1){
+        const newQueue:any = []
+      //delete
+      const res=await fetch('/api/streams/deletestream',{
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json'
+        },
+        body:JSON.stringify({streamId:queue[0].id,userId:queue[0].userId})
       })
+      // console.log(await res.json())
+      setQueue(newQueue)
+      setCurrentSong(cs)
+        toast({
+          title: "No more songs in queue",
+          description: "Add more songs to the queue!",
+          variant: "destructive",
+        })
+      }
+      else{
+        toast({
+          title: "No Songs",
+          description: "No songs left in the queue to play next",
+          variant: "destructive",
+        })
+      }
     }
   }
 
   const getstreams = async () => {
     const allstreams = await fetch('/api/streams/my')
     const data = await allstreams.json()
-    console.log(data.streams)
+    // console.log(data.streams)
     let tempdata=data.streams.sort((a:any,b:any)=>b.upvotes-a.upvotes)
     setQueue(tempdata)
 
@@ -137,7 +166,6 @@ export default function MusicVotingApp() {
     if (queue.length > 0 && currentSong?.id !== queue[0].id) {
       setCurrentSong(queue[0])
     }
-    console.log("inside effect")
   }, [queue.length, currentSong])
 
   const truncateDescription = (description: string) => {
@@ -149,18 +177,18 @@ export default function MusicVotingApp() {
     <div className="min-h-screen bg-gray-900 text-gray-100 p-2">
       <Appbar />
       <div className="max-w-4xl mx-auto px-4">
-        <div className="flex flex-col md:flex-row justify-between items-center mb-6">
-          <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">Music Voting App</h1>
-          <Button onClick={handleShare} className="bg-purple-600 hover:bg-purple-700 mt-4 md:mt-0">
+        <div className="flex flex-row justify-between items-center mb-6">
+          <h1 className="md:text-4xl text-2xl bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">Vote👍👎</h1>
+          <Button onClick={handleShare} className="bg-purple-600 hover:bg-purple-700 mt-1 md:mt-0 px-3">
             <Share2 className="mr-2 h-4 w-4" />
             Share
           </Button>
         </div>
 
         <div className="mb-6">
-          <div className="flex flex-col md:flex-row justify-between items-center mb-2">
-            <h2 className="text-2xl font-semibold text-blue-300">Now Playing</h2>
-            <Button onClick={playNextSong} className="bg-blue-600 hover:bg-blue-700 mt-4 md:mt-0">
+          <div className="flex flex-row justify-between items-center mb-4">
+            <h2 className="md:text-2xl text-xl  text-blue-300">Now Playing</h2>
+            <Button onClick={playNextSong} className="bg-blue-600 hover:bg-blue-700 mt-0 px-3">
               <SkipForward className="mr-2 h-4 w-4" />
               Play Next
             </Button>
@@ -195,6 +223,12 @@ export default function MusicVotingApp() {
 
         <div>
           <h2 className="text-2xl font-semibold mb-2 text-blue-300">Up Next</h2>
+          {
+            queue.length==0&&
+            <div className='border-2 m-1 p-2 text-center rounded-xl border-dotted border-blue-400'>
+              <div>No Songs in the queue yet!</div>
+            </div>
+          }
           {queue.length > 0 && queue.map((song) => (
             <Card key={song.id} className="mb-2 bg-gradient-to-r from-gray-800 to-gray-900 border-gray-700 hover:border-blue-500 transition-colors">
               <CardContent className="flex flex-col md:flex-row items-center justify-between p-4">
