@@ -136,9 +136,12 @@ export default function StreamView({params}:{params:any}) {
 
   useEffect(() => {
 
-    // if(!session.data?.user){
-    //   signIn()
-    // }
+    if(!session.data?.user){
+      toast({
+        title: "Sign In",
+        description: "To Upvote or Add please Sign In...",
+      })
+    }
     
 
     const getid=async()=>{
@@ -148,6 +151,7 @@ export default function StreamView({params}:{params:any}) {
     }
     getid()
     getstreams()
+    
     // if (queue.length > 0 && currentSong.id !== queue[0].id) {
     //   setCurrentSong(queue[0])
     // }
@@ -163,9 +167,9 @@ export default function StreamView({params}:{params:any}) {
     <div className="min-h-screen bg-gray-900 text-gray-100 p-4">
       <Appbar />
       <div className="max-w-4xl mx-auto px-4">
-        <div className="flex flex-col md:flex-row justify-between items-center mb-6">
-          <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">Music Voting App</h1>
-          <Button onClick={handleShare} className="bg-purple-600 hover:bg-purple-700 mt-4 md:mt-0">
+        <div className="flex flex-row justify-between items-center mb-6">
+          <h1 className="md:text-3xl text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">Vote in Stream</h1>
+          <Button onClick={handleShare} className="bg-purple-600 hover:bg-purple-700  md:mt-0">
             <Share2 className="mr-2 h-4 w-4" />
             Share
           </Button>
@@ -209,6 +213,12 @@ export default function StreamView({params}:{params:any}) {
 
         <div>
           <h2 className="text-2xl font-semibold mb-2 text-blue-300">Up Next</h2>
+          {
+            queue.length==0&&
+            <div className='border-2 m-1 p-2 text-center rounded-xl border-dotted border-blue-400'>
+              <div>No Songs in the queue yet!</div>
+            </div>
+          }
           {queue.length>0&&queue.map((song) => (
             <Card key={song.id} className="mb-2 bg-gradient-to-r from-gray-800 to-gray-900 border-gray-700 hover:border-blue-500 transition-colors">
               <CardContent className="flex flex-col md:flex-row items-center justify-between p-4">
