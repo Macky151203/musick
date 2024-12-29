@@ -47,15 +47,25 @@ export default function MusicVotingApp() {
         body: JSON.stringify(newSongatcual)
       })
       const data = await res.json()
+      console.log(data)
       // console.log("Newly added stream-", data)
       // console.log("newly added stream",await res.json())
 
 
 
-      setQueue([...queue, data.stream])
+      if(data.status!==-1){
+        setQueue([...queue, data.stream])
       setNewSongUrl('')
       setIsLoading(false)
       showtoast()
+      }else{
+        toast({
+          title:"Cannot add song",
+          description: "Only chrome video urls accepted",
+        })
+        setIsLoading(false)
+        setNewSongUrl('')
+      }
 
     }
 

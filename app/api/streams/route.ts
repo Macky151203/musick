@@ -13,7 +13,7 @@ export async function POST(req:NextRequest){
     //try adding regex'
     const isyt=data.url.includes("youtube")
     if(!isyt){
-      return NextResponse.json({msg:"Wrong url format"})
+      return NextResponse.json({msg:"Wrong url format",status:-1})
     }
     const extractedId=data.url.split("?v=")[1]
     const details=await youtubesearchapi.GetVideoDetails(extractedId)
