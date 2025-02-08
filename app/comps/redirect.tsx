@@ -11,4 +11,4 @@ export default function Redirect(){
     }
   },[session])
   return null
-}``
+}

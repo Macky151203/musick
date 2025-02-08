@@ -11,6 +11,8 @@ import { ThumbsUp, ThumbsDown, SkipForward, Share2 } from 'lucide-react'
 import { useToast } from "@/hooks/use-toast"
 import { signIn, useSession } from 'next-auth/react'
 import Appbar from '@/app/comps/appbar'
+import {io} from 'socket.io-client'
+import { Konkhmer_Sleokchher } from 'next/font/google'
 
 const initialQueue: any[] | (() => any[]) = [
   //{ id: 1, title: 'Song 1', description: 'Artist 1', upvotes: 5, url: 'paWE-GvDO1c' },
@@ -19,6 +21,8 @@ const initialQueue: any[] | (() => any[]) = [
 ]
 
 export default function StreamView({params}:{params:any}) {
+
+  var socket: any = io('https://musick-backend.onrender.com')
   const [cid,setid]=useState("")
   const [queue, setQueue] = useState(initialQueue)
   const [newSongUrl, setNewSongUrl] = useState('')
@@ -31,6 +35,10 @@ export default function StreamView({params}:{params:any}) {
       description: "New Video added successfully",
     })
   }
+
+  socket.on('updatelist',()=>{  
+    getstreams()
+  })
 
   const handleSubmit = async(e: React.FormEvent) => {
     
@@ -51,7 +59,24 @@ export default function StreamView({params}:{params:any}) {
       })
       const data=await res.json()
       console.log("Newly added stream-" ,data)
+      if (data.status !== -1) {
+        setQueue([...queue, data.stream])
+        socket.emit('addednewsong')
+        setNewSongUrl('')
+        setIsLoading(false)
+        showtoast()
+      } else {
+        toast({
+          title: "Cannot add song",
+          description: "Only chrome video urls accepted",
+        })
+        setIsLoading(false)
+        setNewSongUrl('')
+      }
       // console.log("newly added stream",await res.json())
+
+      //emit from socket
+      
 
       
       
@@ -64,25 +89,30 @@ export default function StreamView({params}:{params:any}) {
     
   }
 
-  const handleVote = async(id: number, increment: number) => {
+  //recv from socket and fetch again
+
+  const handleVote = async (id: number, increment: number,creatorid:number) => {
     //console.log("streamid-",id)
-    const response=await fetch(increment==1?'/api/streams/upvotes':'/api/streams/downvotes',{
-      method:"POST",
-      headers:{
-        "Content-Type":"application/json"
-      },
-      body:JSON.stringify({streamId:id})
-    })
-    const r=await response.json()
     
-    if(r.status==1){
+    const response = await fetch(increment == 1 ? '/api/streams/upvotes' : '/api/streams/downvotes', {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ streamId: id, fromuser: 0 })
+    })
+    const r = await response.json()
+    
+
+    if (r.status == 1) {
+      socket.emit('update',creatorid,id,increment)
       
-      setQueue(queue.map(song => 
+      setQueue(queue.map(song =>
         song.id === id ? { ...song, upvotes: song.upvotes + increment } : song
       ).sort((a, b) => b.upvotes - a.upvotes))
       //console.log("after sorting-",queue)
     }
-    else{
+    else {
       toast({
         title: "Alert",
         description: "Cannot upvote or downvote more than once!!",
@@ -90,6 +120,14 @@ export default function StreamView({params}:{params:any}) {
       })
     }
   }
+
+  socket.on('recv',(data:any)=>{
+    // console.log("received from socket- ",data)
+    let id=data.songid
+    setQueue(queue.map(song =>
+      song.id === id ? { ...song, upvotes: song.upvotes + data.increment } : song
+    ).sort((a, b) => b.upvotes - a.upvotes))
+  })
 
   const handleShare = async() => {
     //now make a new page for this route
@@ -129,7 +167,8 @@ export default function StreamView({params}:{params:any}) {
     const allstreams=await fetch(`/api/streams?creatorId=${cid}`)
     const data=await allstreams.json()
     console.log(data.streams)
-    setQueue(data.streams)
+    let tempdata=data.streams.sort((a:any,b:any)=>b.upvotes-a.upvotes)
+    setQueue(tempdata)
     
     
   }
@@ -145,7 +184,7 @@ export default function StreamView({params}:{params:any}) {
     
 
     const getid=async()=>{
-      const paramid=await params 
+      const paramid=await params  
       setid(paramid.creatorId)
       console.log("id",paramid.creatorId)
     }
@@ -231,7 +270,7 @@ export default function StreamView({params}:{params:any}) {
                   <Button 
                     size="icon" 
                     variant="ghost" 
-                    onClick={() => handleVote(song.id, 1)}
+                    onClick={() => handleVote(song.id,1,song.userId)}
                     className="hover:bg-blue-500/20 text-blue-400"
                   >
                     <ThumbsUp className="h-4 w-4" />
@@ -239,7 +278,7 @@ export default function StreamView({params}:{params:any}) {
                   <Button 
                     size="icon" 
                     variant="ghost" 
-                    onClick={() => handleVote(song.id, -1)}
+                    onClick={() => handleVote(song.id,-1,song.userId)}
                     className="hover:bg-purple-500/20 text-purple-400"
                   >
                     <ThumbsDown className="h-4 w-4" />

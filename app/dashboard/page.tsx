@@ -4,16 +4,18 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { ThumbsUp, ThumbsDown, SkipForward, Share2 } from 'lucide-react'
-
-
 import { useToast } from "@/hooks/use-toast"
 import { useSession } from 'next-auth/react'
+import { io } from 'socket.io-client'
 import Appbar from '../comps/appbar'
 
 const initialQueue: any[] = []
-const cs:any={}
+const cs: any = {}
 
 export default function MusicVotingApp() {
+
+  var socket: any = io('https://musick-backend.onrender.com')
+
   const [queue, setQueue] = useState(initialQueue)
   const [newSongUrl, setNewSongUrl] = useState('')
   const [currentSong, setCurrentSong] = useState(cs)
@@ -25,6 +27,10 @@ export default function MusicVotingApp() {
       description: "New Video added successfully",
     })
   }
+
+  socket.on('updatelist',()=>{  
+    getstreams()
+  })
 
   const handleSubmit = async (e: React.FormEvent) => {
 
@@ -53,14 +59,15 @@ export default function MusicVotingApp() {
 
 
 
-      if(data.status!==-1){
+      if (data.status !== -1) {
         setQueue([...queue, data.stream])
-      setNewSongUrl('')
-      setIsLoading(false)
-      showtoast()
-      }else{
+        socket.emit('addednewsong')
+        setNewSongUrl('')
+        setIsLoading(false)
+        showtoast()
+      } else {
         toast({
-          title:"Cannot add song",
+          title: "Cannot add song",
           description: "Only chrome video urls accepted",
         })
         setIsLoading(false)
@@ -71,8 +78,9 @@ export default function MusicVotingApp() {
 
   }
 
-  const handleVote = async (id: number, increment: number) => {
+  const handleVote = async (id: number, increment: number, creatorid: number) => {
     //console.log("streamid-",id)
+
     const response = await fetch(increment == 1 ? '/api/streams/upvotes' : '/api/streams/downvotes', {
       method: "POST",
       headers: {
@@ -82,7 +90,9 @@ export default function MusicVotingApp() {
     })
     const r = await response.json()
 
+
     if (r.status == 1) {
+      socket.emit('update', creatorid, id, increment)
 
       setQueue(queue.map(song =>
         song.id === id ? { ...song, upvotes: song.upvotes + increment } : song
@@ -97,6 +107,15 @@ export default function MusicVotingApp() {
       })
     }
   }
+
+  socket.on('recv', (data: any) => {
+    // console.log("received from socket- ",data)
+    let id = data.songid
+    //check a condityion for upvote and downvote, right now only there for increment
+    setQueue(queue.map(song =>
+      song.id === id ? { ...song, upvotes: song.upvotes + data.increment } : song
+    ).sort((a, b) => b.upvotes - a.upvotes))
+  })
 
   const handleShare = async () => {
     //now make a new page for this route
@@ -114,16 +133,16 @@ export default function MusicVotingApp() {
     })
   }
 
-  const playNextSong = async() => {
+  const playNextSong = async () => {
     if (queue.length > 1) {
       const newQueue = [...queue.slice(1)]
       //delete
-      const res=await fetch('/api/streams/deletestream',{
-        method:'POST',
-        headers:{
-          'Content-Type':'application/json'
+      const res = await fetch('/api/streams/deletestream', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
         },
-        body:JSON.stringify({streamId:queue[0].id,userId:queue[0].userId})
+        body: JSON.stringify({ streamId: queue[0].id, userId: queue[0].userId })
       })
       // console.log(await res.json())
       setQueue(newQueue)
@@ -133,26 +152,26 @@ export default function MusicVotingApp() {
         description: `Now playing: ${newQueue[0].title}`,
       })
     } else {
-      if(queue.length==1){
-        const newQueue:any = []
-      //delete
-      const res=await fetch('/api/streams/deletestream',{
-        method:'POST',
-        headers:{
-          'Content-Type':'application/json'
-        },
-        body:JSON.stringify({streamId:queue[0].id,userId:queue[0].userId})
-      })
-      // console.log(await res.json())
-      setQueue(newQueue)
-      setCurrentSong(cs)
+      if (queue.length == 1) {
+        const newQueue: any = []
+        //delete
+        const res = await fetch('/api/streams/deletestream', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ streamId: queue[0].id, userId: queue[0].userId })
+        })
+        // console.log(await res.json())
+        setQueue(newQueue)
+        setCurrentSong(cs)
         toast({
           title: "No more songs in queue",
           description: "Add more songs to the queue!",
           variant: "destructive",
         })
       }
-      else{
+      else {
         toast({
           title: "No Songs",
           description: "No songs left in the queue to play next",
@@ -165,10 +184,9 @@ export default function MusicVotingApp() {
   const getstreams = async () => {
     const allstreams = await fetch('/api/streams/my')
     const data = await allstreams.json()
-    // console.log(data.streams)
-    let tempdata=data.streams.sort((a:any,b:any)=>b.upvotes-a.upvotes)
+    console.log(data.streams)
+    let tempdata = data.streams.sort((a: any, b: any) => b.upvotes - a.upvotes)
     setQueue(tempdata)
-
   }
 
   useEffect(() => {
@@ -234,7 +252,7 @@ export default function MusicVotingApp() {
         <div>
           <h2 className="text-2xl font-semibold mb-2 text-blue-300">Up Next</h2>
           {
-            queue.length==0&&
+            queue.length == 0 &&
             <div className='border-2 m-1 p-2 text-center rounded-xl border-dotted border-blue-400'>
               <div>No Songs in the queue yet!</div>
             </div>
@@ -251,7 +269,7 @@ export default function MusicVotingApp() {
                   <Button
                     size="icon"
                     variant="ghost"
-                    onClick={() => handleVote(song.id, 1)}
+                    onClick={() => handleVote(song.id, 1, song.userId)}
                     className="hover:bg-blue-500/20 text-blue-400"
                   >
                     <ThumbsUp className="h-4 w-4" />
@@ -259,7 +277,7 @@ export default function MusicVotingApp() {
                   <Button
                     size="icon"
                     variant="ghost"
-                    onClick={() => handleVote(song.id, -1)}
+                    onClick={() => handleVote(song.id, -1, song.userId)}
                     className="hover:bg-purple-500/20 text-purple-400"
                   >
                     <ThumbsDown className="h-4 w-4" />
