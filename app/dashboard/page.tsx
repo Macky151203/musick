@@ -28,7 +28,7 @@ export default function MusicVotingApp() {
     })
   }
 
-  socket.on('updatelist',()=>{  
+  socket.on('updatelist', () => {
     getstreams()
   })
 
@@ -205,21 +205,21 @@ export default function MusicVotingApp() {
     <div className="min-h-screen bg-gray-900 text-gray-100 p-2">
       <Appbar />
       <div className="max-w-4xl mx-auto px-4">
-        <div className="flex flex-row justify-between items-center mb-6">
-          <h1 className="md:text-4xl text-2xl bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">Vote👍👎</h1>
-          <Button onClick={handleShare} className="bg-purple-600 hover:bg-purple-700 mt-1 md:mt-0 px-3">
-            <Share2 className="mr-2 h-4 w-4" />
-            Share
-          </Button>
-        </div>
+
 
         <div className="mb-6">
           <div className="flex flex-row justify-between items-center mb-4">
-            <h2 className="md:text-2xl text-xl  text-blue-300">Now Playing</h2>
+            <h2 className="md:text-2xl text-2xl  text-blue-300">Now Playing</h2>
+            <div className='flex flex-col md:flex-row gap-2'>
             <Button onClick={playNextSong} className="bg-blue-600 hover:bg-blue-700 mt-0 px-3">
               <SkipForward className="mr-2 h-4 w-4" />
               Play Next
             </Button>
+            <Button onClick={handleShare} className="bg-purple-600 hover:bg-purple-700 mt-1 md:mt-0 px-3">
+              <Share2 className="mr-2 h-4 w-4" />
+              Share
+            </Button>
+            </div>
           </div>
           <div className="aspect-video rounded-lg overflow-hidden shadow-lg shadow-blue-500/20">
             <iframe
